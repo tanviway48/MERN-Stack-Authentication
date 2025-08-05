@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import userModel from '../models/userModel.js';
+import transpoter from '../config/nodeMailer.js';
 
 export const register=async(req,res)=>{
     const {name,email,password}=req.body;
@@ -28,11 +29,21 @@ export const register=async(req,res)=>{
             sameSite:process.env.NODE_ENV ==='production'?'none':'strict',
             maxAge:7*24*60*60*1000
         });
+        // Sending welcome email
+        const mailOptions={
+            from:process.env.SENDER_EMAIL,
+            to:email,
+            subject:`Welcome to our Webstie. Your account has been cerated successfully with email is:${email}`
+        }
+
+        await transpoter.sendMail(mailOptions);
+
+        return res.json({success:true});
     }
     catch(error){
         res.json({success:false,message:error.message});
     }
-        return res.json({success:true});
+        
 
 }
 
